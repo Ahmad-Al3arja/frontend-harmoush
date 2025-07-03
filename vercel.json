@@ -1,0 +1,22 @@
+{
+  "buildCommand": "npm run build",
+  "devCommand": "next dev",
+  "installCommand": "npm install",
+  "framework": "nextjs",
+  "images": {
+    "domains": ["t3h.dracode.org", "localhost", "example.com", "placehold.co"],
+    "remotePatterns": [
+      {
+        "protocol": "http",
+        "hostname": "t3h.dracode.org",
+        "pathname": "/**"
+      },
+      {
+        "protocol": "https",
+        "hostname": "t3h.dracode.org",
+        "pathname": "/**"
+      }
+    ],
+    "sizes": [16, 32, 48, 64, 96, 128, 256, 384]
+  }
+}

@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Delete Account</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      // Simple function to get URL parameters
+      function getUrlParam(name) {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get(name);
+      }
+
+      // Function to check if user is logged in
+      async function checkAuth() {
+        try {
+          // Try to get user data from localStorage
+          const userData = localStorage.getItem("auth_user");
+          const accessToken = localStorage.getItem("auth_accessToken");
+
+          if (!userData || !accessToken) {
+            window.location.href = "/login";
+            return;
+          }
+
+          // User is authenticated, show the delete account form
+          document.getElementById("loading").style.display = "none";
+          document.getElementById("delete-form").style.display = "block";
+
+          // Pre-fill user email if available
+          const user = JSON.parse(userData);
+          document.getElementById("user-email").textContent = user.email || "";
+        } catch (error) {
+          console.error("Auth check error:", error);
+          window.location.href = "/login";
+        }
+      }
+
+      // Function to handle account deletion
+      async function deleteAccount() {
+        const emailInput = document.getElementById("email").value;
+        const errorDiv = document.getElementById("error-message");
+        const successDiv = document.getElementById("success-message");
+        const submitBtn = document.getElementById("submit-btn");
+
+        errorDiv.style.display = "none";
+        successDiv.style.display = "none";
+
+        try {
+          // Get user data and token
+          const userData = localStorage.getItem("auth_user");
+          const accessToken = localStorage.getItem("auth_accessToken");
+
+          if (!userData || !accessToken) {
+            errorDiv.textContent = "You are not logged in.";
+            errorDiv.style.display = "block";
+            return;
+          }
+
+          const user = JSON.parse(userData);
+
+          // Validate email matches user's email
+          if (emailInput !== user.email) {
+            errorDiv.textContent =
+              "The email address does not match your account email.";
+            errorDiv.style.display = "block";
+            return;
+          }
+
+          // Disable button and show loading state
+          submitBtn.disabled = true;
+          submitBtn.textContent = "Processing...";
+
+          // Call the delete API
+          const response = await fetch(`/api/users/${user.id}`, {
+            method: "DELETE",
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+              "Content-Type": "application/json",
+            },
+          });
+
+          if (!response.ok) {
+            throw new Error("Failed to delete account");
+          }
+
+          // Show success message
+          successDiv.textContent =
+            "Your account has been successfully deleted.";
+          successDiv.style.display = "block";
+
+          // Clear auth data from localStorage after a delay
+          setTimeout(() => {
+            localStorage.removeItem("auth_user");
+            localStorage.removeItem("auth_accessToken");
+            localStorage.removeItem("auth_refreshToken");
+
+            // Stay on the page instead of redirecting
+          }, 2000);
+        } catch (error) {
+          console.error("Delete account error:", error);
+          errorDiv.textContent =
+            "Failed to delete account. Please try again later.";
+          errorDiv.style.display = "block";
+
+          // Re-enable button
+          submitBtn.disabled = false;
+          submitBtn.textContent = "Delete My Account";
+        }
+      }
+
+      // Run auth check when page loads
+      window.onload = checkAuth;
+    </script>
+  </head>
+  <body class="bg-gray-100 min-h-screen">
+    <div id="loading" class="flex h-screen items-center justify-center">
+      <div
+        class="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"
+      ></div>
+    </div>
+
+    <div
+      id="delete-form"
+      class="flex flex-col items-center justify-center min-h-screen p-4"
+      style="display: none"
+    >
+      <div class="w-full max-w-md p-8 space-y-8 bg-white rounded-lg shadow-md">
+        <div class="text-center">
+          <h1 class="text-2xl font-bold text-gray-900">Delete Account</h1>
+          <p class="mt-2 text-sm text-gray-600">
+            This action cannot be undone. Please be certain.
+          </p>
+        </div>
+
+        <div
+          id="error-message"
+          class="p-3 bg-red-100 text-red-700 rounded-md"
+          style="display: none"
+        ></div>
+        <div
+          id="success-message"
+          class="p-3 bg-green-100 text-green-700 rounded-md"
+          style="display: none"
+        ></div>
+
+        <div class="mt-8 space-y-6">
+          <div>
+            <p class="block text-sm font-medium text-gray-700">
+              Your account email:
+              <span id="user-email" class="font-bold"></span>
+            </p>
+            <label
+              for="email"
+              class="block text-sm font-medium text-gray-700 mt-4"
+            >
+              Enter your email address to confirm account deletion
+            </label>
+            <input
+              id="email"
+              name="email"
+              type="email"
+              required
+              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+              placeholder="your-email@example.com"
+            />
+          </div>
+
+          <div>
+            <button
+              id="submit-btn"
+              onclick="deleteAccount()"
+              class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:bg-red-300"
+            >
+              Delete My Account
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

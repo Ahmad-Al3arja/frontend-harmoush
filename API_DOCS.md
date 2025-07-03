@@ -1,0 +1,456 @@
+# Talabak Marketplace API Documentation
+
+## Base URL
+
+`http://localhost:8000/api`
+
+## Authentication
+
+The API uses JWT (JSON Web Token) authentication. Include the token in the Authorization header:
+
+```
+Authorization: Bearer <access_token>
+```
+
+### Authentication Endpoints
+
+#### Register New User
+
+```http
+POST /auth/register/
+```
+
+Request Body:
+
+```json
+{
+  "email": "user@example.com",
+  "password": "secure_password",
+  "first_name": "John",
+  "last_name": "Doe",
+  "phone": "1234567890",
+  "is_seller": false,
+  "bio": "A short bio about me"
+}
+```
+
+Success Response (201 Created):
+
+```json
+{
+  "user": {
+    "id": 1,
+    "email": "user@example.com",
+    "first_name": "John",
+    "last_name": "Doe",
+    "phone": "1234567890",
+    "is_seller": false,
+    "bio": "A short bio about me",
+    "profile_picture": null,
+    "created_at": "2025-01-19T20:30:00Z"
+  },
+  "refresh": "eyJ0eXAiOiJKV1QiLCJhbGc...",
+  "access": "eyJ0eXAiOiJKV1QiLCJhbGc..."
+}
+```
+
+Error Response (400 Bad Request):
+
+```json
+{
+  "email": ["This email is already registered."],
+  "password": ["This password is too common."]
+}
+```
+
+#### Login
+
+```http
+POST /auth/login/
+```
+
+Request Body:
+
+```json
+{
+  "email": "user@example.com",
+  "password": "secure_password"
+}
+```
+
+Success Response (200 OK):
+
+```json
+{
+  "user": {
+    "id": 1,
+    "email": "user@example.com",
+    "first_name": "John",
+    "last_name": "Doe",
+    "phone": "1234567890",
+    "is_seller": false,
+    "bio": "A short bio about me",
+    "profile_picture": null,
+    "created_at": "2025-01-19T20:30:00Z"
+  },
+  "refresh": "eyJ0eXAiOiJKV1QiLCJhbGc...",
+  "access": "eyJ0eXAiOiJKV1QiLCJhbGc..."
+}
+```
+
+Error Response (401 Unauthorized):
+
+```json
+{
+  "error": "Invalid email or password"
+}
+```
+
+#### Refresh Token
+
+```http
+POST /auth/token/refresh/
+```
+
+Request Body:
+
+```json
+{
+  "refresh": "eyJ0eXAiOiJKV1QiLCJhbGc..."
+}
+```
+
+Success Response (200 OK):
+
+```json
+{
+  "access": "eyJ0eXAiOiJKV1QiLCJhbGc..."
+}
+```
+
+## User Management
+
+#### Get Current User Profile
+
+```http
+GET /users/me/
+Authorization: Bearer <access_token>
+```
+
+Success Response (200 OK):
+
+```json
+{
+  "id": 1,
+  "email": "user@example.com",
+  "first_name": "John",
+  "last_name": "Doe",
+  "phone": "1234567890",
+  "is_seller": false,
+  "bio": "A short bio about me",
+  "profile_picture": null,
+  "created_at": "2025-01-19T20:30:00Z"
+}
+```
+
+#### Update User Profile
+
+```http
+PUT /users/1/update/
+Authorization: Bearer <access_token>
+```
+
+Request Body:
+
+```json
+{
+  "first_name": "John Updated",
+  "bio": "Updated bio"
+}
+```
+
+Success Response (200 OK):
+
+```json
+{
+  "id": 1,
+  "email": "user@example.com",
+  "first_name": "John Updated",
+  "last_name": "Doe",
+  "phone": "1234567890",
+  "is_seller": false,
+  "bio": "Updated bio",
+  "profile_picture": null,
+  "created_at": "2025-01-19T20:30:00Z"
+}
+```
+
+## Products
+
+#### Create Category
+
+```http
+POST /categories/create/
+Authorization: Bearer <access_token>
+```
+
+Request Body:
+
+```json
+{
+  "name": "Electronics",
+  "description": "Electronic devices and accessories",
+  "parent": null
+}
+```
+
+Success Response (201 Created):
+
+```json
+{
+  "id": 1,
+  "name": "Electronics",
+  "description": "Electronic devices and accessories",
+  "parent": null,
+  "created_at": "2025-01-19T20:30:00Z"
+}
+```
+
+#### List Categories
+
+```http
+GET /categories/
+```
+
+Success Response (200 OK):
+
+```json
+[
+  {
+    "id": 1,
+    "name": "Electronics",
+    "description": "Electronic devices and accessories",
+    "parent": null,
+    "created_at": "2025-01-19T20:30:00Z"
+  },
+  {
+    "id": 2,
+    "name": "Smartphones",
+    "description": "Mobile phones and accessories",
+    "parent": 1,
+    "created_at": "2025-01-19T20:31:00Z"
+  }
+]
+```
+
+#### Create Product
+
+```http
+POST /products/create/
+Authorization: Bearer <access_token>
+Content-Type: multipart/form-data
+```
+
+Request Body:
+
+```json
+{
+    "name": "iPhone 15",
+    "description": "Latest iPhone model",
+    "price": "999.99",
+    "stock": 10,
+    "category": 2,
+    "image": <file>
+}
+```
+
+Success Response (201 Created):
+
+```json
+{
+  "id": 1,
+  "name": "iPhone 15",
+  "description": "Latest iPhone model",
+  "price": "999.99",
+  "stock": 10,
+  "category": 2,
+  "category_name": "Smartphones",
+  "seller": "user@example.com",
+  "is_active": true,
+  "image": "/media/product_images/iphone15.jpg",
+  "created_at": "2025-01-19T20:32:00Z",
+  "updated_at": "2025-01-19T20:32:00Z",
+  "average_rating": 0,
+  "reviews": []
+}
+```
+
+#### List Products
+
+```http
+GET /products/?category=2&min_price=500&max_price=1000&search=iPhone
+```
+
+Success Response (200 OK):
+
+```json
+{
+  "count": 1,
+  "next": null,
+  "previous": null,
+  "results": [
+    {
+      "id": 1,
+      "name": "iPhone 15",
+      "description": "Latest iPhone model",
+      "price": "999.99",
+      "stock": 10,
+      "category": 2,
+      "category_name": "Smartphones",
+      "seller": "user@example.com",
+      "is_active": true,
+      "image": "/media/product_images/iphone15.jpg",
+      "created_at": "2025-01-19T20:32:00Z",
+      "updated_at": "2025-01-19T20:32:00Z",
+      "average_rating": 0,
+      "reviews": []
+    }
+  ]
+}
+```
+
+#### Create Product Review
+
+```http
+POST /products/1/reviews/create/
+Authorization: Bearer <access_token>
+```
+
+Request Body:
+
+```json
+{
+  "rating": 5,
+  "comment": "Excellent product!"
+}
+```
+
+Success Response (201 Created):
+
+```json
+{
+  "id": 1,
+  "user": "user@example.com",
+  "product": 1,
+  "rating": 5,
+  "comment": "Excellent product!",
+  "created_at": "2025-01-19T20:33:00Z"
+}
+```
+
+#### List Product Reviews
+
+```http
+GET /products/1/reviews/
+```
+
+Success Response (200 OK):
+
+```json
+[
+  {
+    "id": 1,
+    "user": "user@example.com",
+    "product": 1,
+    "rating": 5,
+    "comment": "Excellent product!",
+    "created_at": "2025-01-19T20:33:00Z"
+  }
+]
+```
+
+## User Reviews
+
+#### Create User Review
+
+```http
+POST /users/1/reviews/create/
+Authorization: Bearer <access_token>
+```
+
+Request Body:
+
+```json
+{
+  "rating": 5,
+  "comment": "Great seller, fast shipping!"
+}
+```
+
+Success Response (201 Created):
+
+```json
+{
+  "id": 1,
+  "author": "reviewer@example.com",
+  "subject": "user@example.com",
+  "rating": 5,
+  "comment": "Great seller, fast shipping!",
+  "created_at": "2025-01-19T20:34:00Z"
+}
+```
+
+#### List User Reviews
+
+```http
+GET /users/1/reviews/
+```
+
+Success Response (200 OK):
+
+```json
+[
+  {
+    "id": 1,
+    "author": "reviewer@example.com",
+    "subject": "user@example.com",
+    "rating": 5,
+    "comment": "Great seller, fast shipping!",
+    "created_at": "2025-01-19T20:34:00Z"
+  }
+]
+```
+
+## Error Responses
+
+### 401 Unauthorized
+
+```json
+{
+  "detail": "Authentication credentials were not provided."
+}
+```
+
+### 403 Forbidden
+
+```json
+{
+  "detail": "You do not have permission to perform this action."
+}
+```
+
+### 404 Not Found
+
+```json
+{
+  "detail": "Not found."
+}
+```
+
+### 400 Bad Request
+
+```json
+{
+  "field_name": ["Error message"]
+}
+```
