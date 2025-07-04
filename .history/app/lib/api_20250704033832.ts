@@ -3,7 +3,7 @@
 import { create } from "zustand";
 
 // Use environment variable for API base URL
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://188.245.103.205/api";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "/api/proxy";
 
 interface RequestConfig extends RequestInit {
   token?: string;
@@ -348,6 +348,34 @@ export interface CreateProductData
   > {
   image?: File;
   uploaded_images?: File[];
+}
+
+export interface AdvertisementVideo {
+  id: number;
+  title: string;
+  video: string;
+  video_url: string;
+  thumbnail: string | null;
+  thumbnail_url: string | null;
+  uploaded_by: number;
+  uploaded_by_name: string;
+  uploaded_at: string;
+  updated_at: string;
+  is_active: boolean;
+}
+
+export interface CreateVideoData {
+  title: string;
+  video: File;
+  thumbnail?: File;
+  is_active: boolean;
+}
+
+export interface UpdateVideoData {
+  title?: string;
+  video?: File;
+  thumbnail?: File;
+  is_active?: boolean;
 }
 
 export const api = {
@@ -747,6 +775,76 @@ export const api = {
         token,
         body: JSON.stringify({ featured_order }),
         headers: { "Content-Type": "application/json" },
+      }),
+  },
+
+  videos: {
+    getAll: (token: string) =>
+      request<AdvertisementVideo[]>("/videos/", { token }),
+
+    get: (id: number, token: string) =>
+      request<AdvertisementVideo>(`/videos/${id}/`, { token }),
+
+    create: (data: CreateVideoData | FormData, token: string) => {
+      let formData: FormData;
+
+      if (data instanceof FormData) {
+        // If FormData is passed directly, use it
+        formData = data;
+      } else {
+        // Otherwise, create a new FormData from the object
+        formData = new FormData();
+
+        formData.append("title", data.title);
+        formData.append("video", data.video);
+        if (data.thumbnail) {
+          formData.append("thumbnail", data.thumbnail);
+        }
+        formData.append("is_active", data.is_active.toString());
+      }
+
+      return request<AdvertisementVideo>("/videos/", {
+        method: "POST",
+        body: formData,
+        token,
+        isFormData: true,
+      });
+    },
+
+    update: (id: number, data: UpdateVideoData | FormData, token: string) => {
+      let formData: FormData;
+
+      if (data instanceof FormData) {
+        // If FormData is passed directly, use it
+        formData = data;
+      } else {
+        // Otherwise, create a new FormData from the object
+        formData = new FormData();
+
+        if (data.title) formData.append("title", data.title);
+        if (data.video) formData.append("video", data.video);
+        if (data.thumbnail) formData.append("thumbnail", data.thumbnail);
+        if (data.is_active !== undefined) formData.append("is_active", data.is_active.toString());
+      }
+
+      return request<AdvertisementVideo>(`/videos/${id}/`, {
+        method: "PUT",
+        body: formData,
+        token,
+        isFormData: true,
+      });
+    },
+
+    delete: (id: number, token: string) =>
+      request<{}>(`/videos/${id}/`, {
+        method: "DELETE",
+        token,
+      }),
+
+    setActive: (id: number, token: string) =>
+      request<AdvertisementVideo>(`/videos/${id}/set_active/`, {
+        method: "PUT",
+        token,
       }),
   },
 

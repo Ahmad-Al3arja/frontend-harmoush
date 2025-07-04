@@ -520,6 +520,14 @@ export default function AdvertisementVideosPage() {
           </div>
         </DialogContent>
       </Dialog>
+
+      <ConfirmDialog
+        open={deleteDialogOpen === video.id}
+        onOpenChange={(open) => setDeleteDialogOpen(open ? video.id : null)}
+        title="Delete Video"
+        description="Are you sure you want to delete this video? This action cannot be undone."
+        onConfirm={() => handleDelete(video.id)}
+      />
     </div>
   )
 } 

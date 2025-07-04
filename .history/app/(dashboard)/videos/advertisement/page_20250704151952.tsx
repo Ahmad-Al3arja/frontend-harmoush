@@ -56,7 +56,6 @@ export default function AdvertisementVideosPage() {
     thumbnail: null as File | null,
     is_active: false
   })
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState<number | null>(null)
 
   const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://188.245.103.205/api'
   const accessToken = useAuthStore((state) => state.accessToken)
@@ -391,10 +390,16 @@ export default function AdvertisementVideosPage() {
                       <Edit className="w-4 h-4 mr-1" />
                       Edit
                     </Button>
-                    <Button size="sm" variant="outline" className="text-red-600" onClick={() => setDeleteDialogOpen(video.id)}>
-                      <Trash2 className="w-4 h-4 mr-1" />
-                      Delete
-                    </Button>
+                    <ConfirmDialog
+                      title="Delete Video"
+                      description="Are you sure you want to delete this video? This action cannot be undone."
+                      onConfirm={() => handleDelete(video.id)}
+                    >
+                      <Button size="sm" variant="outline" className="text-red-600">
+                        <Trash2 className="w-4 h-4 mr-1" />
+                        Delete
+                      </Button>
+                    </ConfirmDialog>
                   </div>
                 </div>
               </CardHeader>

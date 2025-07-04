@@ -3,7 +3,7 @@
 import { create } from "zustand";
 
 // Use environment variable for API base URL
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://188.245.103.205/api";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://188.245.103.205:8000/api";
 
 interface RequestConfig extends RequestInit {
   token?: string;

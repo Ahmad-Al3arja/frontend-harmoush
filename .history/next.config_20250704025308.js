@@ -13,6 +13,7 @@ const nextConfig = {
       {
         protocol: 'http',
         hostname: '188.245.103.205',
+        port: '8000',
         pathname: '/media/**',
       },
       {
@@ -51,7 +52,7 @@ const nextConfig = {
   },
   experimental: {
     serverActions: {
-      allowedOrigins: ['localhost:3000', '192.168.1.3:3000', '188.245.103.205:3000'],
+      allowedOrigins: ['localhost:3000', '192.168.1.3:3000'],
     },
   },
 };

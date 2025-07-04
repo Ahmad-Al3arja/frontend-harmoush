@@ -3,7 +3,11 @@
 import { create } from "zustand";
 
 // Use environment variable for API base URL
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://188.245.103.205/api";
+// In development, use the proxy to avoid CORS issues
+const isDevelopment = process.env.NODE_ENV === 'development';
+const API_BASE_URL = isDevelopment 
+  ? '/api/proxy' 
+  : (process.env.NEXT_PUBLIC_API_BASE_URL || "http://188.245.103.205/api");
 
 interface RequestConfig extends RequestInit {
   token?: string;

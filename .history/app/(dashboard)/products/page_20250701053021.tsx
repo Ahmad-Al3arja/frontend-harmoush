@@ -226,10 +226,9 @@ function ProductsContent() {
       header: "Featured Order",
       cell: ({ row }) => {
         const product = row.original;
-        const productId = product.id ?? 0;
         const value =
-          featuredOrderEdits[productId] !== undefined
-            ? featuredOrderEdits[productId]
+          featuredOrderEdits[product.id] !== undefined
+            ? featuredOrderEdits[product.id]
             : product.featured_order ?? "";
         return (
           <div className="flex items-center gap-2">
@@ -238,16 +237,16 @@ function ProductsContent() {
               min={0}
               className="border rounded px-2 py-1 w-20"
               value={value === null ? "" : value}
-              onChange={(e) => handleFeaturedOrderChange(productId, e.target.value)}
+              onChange={(e) => handleFeaturedOrderChange(product.id, e.target.value)}
               placeholder="None"
             />
             <Button
               size="sm"
               variant="outline"
-              onClick={() => handleSaveFeaturedOrder(productId)}
-              disabled={savingFeaturedOrder[productId]}
+              onClick={() => handleSaveFeaturedOrder(product.id)}
+              disabled={savingFeaturedOrder[product.id]}
             >
-              {savingFeaturedOrder[productId] ? "Saving..." : "Save"}
+              {savingFeaturedOrder[product.id] ? "Saving..." : "Save"}
             </Button>
           </div>
         );

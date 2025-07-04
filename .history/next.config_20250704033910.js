@@ -8,6 +8,17 @@ const nextConfig = {
     // Disable ESLint during build
     ignoreDuringBuilds: true,
   },
+  experimental: {
+    serverActions: {
+      allowedOrigins: ['localhost:3000', '192.168.1.3:3000', '188.245.103.205:3000'],
+    },
+  },
+  api: {
+    bodyParser: {
+      sizeLimit: '250mb',
+    },
+    responseLimit: false,
+  },
   images: {
     remotePatterns: [
       {

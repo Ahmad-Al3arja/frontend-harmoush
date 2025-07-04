@@ -71,7 +71,7 @@ export function Header() {
             <span className={`inline-block w-2 h-2 rounded-full ${statusDot} mr-1`} />
             <span>{statusText}</span>
             <span className="ml-2 text-xs text-blue-600 font-mono hidden sm:inline">
-              {process.env.NEXT_PUBLIC_API_DOMAIN || "188.245.103.205"}
+              {process.env.NEXT_PUBLIC_API_DOMAIN || "188.245.103.205:8000"}
             </span>
           </div>
           {/* User Info */}

@@ -56,9 +56,12 @@ export default function AdvertisementVideosPage() {
     thumbnail: null as File | null,
     is_active: false
   })
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState<number | null>(null)
 
-  const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://188.245.103.205/api'
+  // In development, use the proxy to avoid CORS issues
+  const isDevelopment = process.env.NODE_ENV === 'development';
+  const API_BASE = isDevelopment 
+    ? '/api/proxy' 
+    : (process.env.NEXT_PUBLIC_API_URL || 'http://188.245.103.205/api')
   const accessToken = useAuthStore((state) => state.accessToken)
 
   useEffect(() => {
@@ -107,23 +110,11 @@ export default function AdvertisementVideosPage() {
       }
       formDataToSend.append('is_active', formData.is_active.toString())
 
-      console.log('Uploading video to:', `${API_BASE}/videos/`)
-      console.log('FormData contents:', {
-        title: formData.title,
-        videoName: formData.video.name,
-        videoSize: formData.video.size,
-        thumbnailName: formData.thumbnail?.name,
-        isActive: formData.is_active
-      })
-
       const response = await fetch(`${API_BASE}/videos/`, {
         method: 'POST',
         headers: accessToken ? { 'Authorization': `Bearer ${accessToken}` } : {},
         body: formDataToSend
       })
-
-      console.log('Response status:', response.status)
-      console.log('Response headers:', Object.fromEntries(response.headers.entries()))
 
       if (response.ok) {
         toast.success('Video uploaded successfully')
@@ -131,18 +122,11 @@ export default function AdvertisementVideosPage() {
         setFormData({ title: '', video: null, thumbnail: null, is_active: false })
         fetchVideos()
       } else {
-        const errorText = await response.text()
-        console.error('Upload error response:', errorText)
-        try {
-          const error = JSON.parse(errorText)
-          toast.error(error.video?.[0] || 'Failed to upload video')
-        } catch (parseError) {
-          toast.error(`Upload failed: ${response.status} ${response.statusText}`)
-        }
+        const error = await response.json()
+        toast.error(error.video?.[0] || 'Failed to upload video')
       }
     } catch (error) {
-      console.error('Upload error:', error)
-      toast.error(`Error uploading video: ${error instanceof Error ? error.message : 'Unknown error'}`)
+      toast.error('Error uploading video')
     } finally {
       setUploading(false)
     }
@@ -362,7 +346,7 @@ export default function AdvertisementVideosPage() {
                     <CardTitle className="flex items-center gap-2">
                       {video.title}
                       {video.is_active && (
-                        <Badge className="bg-green-500">
+                        <Badge variant="default" className="bg-green-500">
                           <CheckCircle className="w-3 h-3 mr-1" />
                           Active
                         </Badge>
@@ -391,10 +375,16 @@ export default function AdvertisementVideosPage() {
                       <Edit className="w-4 h-4 mr-1" />
                       Edit
                     </Button>
-                    <Button size="sm" variant="outline" className="text-red-600" onClick={() => setDeleteDialogOpen(video.id)}>
-                      <Trash2 className="w-4 h-4 mr-1" />
-                      Delete
-                    </Button>
+                    <ConfirmDialog
+                      title="Delete Video"
+                      description="Are you sure you want to delete this video? This action cannot be undone."
+                      onConfirm={() => handleDelete(video.id)}
+                    >
+                      <Button size="sm" variant="outline" className="text-red-600">
+                        <Trash2 className="w-4 h-4 mr-1" />
+                        Delete
+                      </Button>
+                    </ConfirmDialog>
                   </div>
                 </div>
               </CardHeader>
@@ -427,7 +417,7 @@ export default function AdvertisementVideosPage() {
                     <div className="space-y-2 text-sm">
                       <div>
                         <span className="font-medium">Status:</span>
-                        <Badge className={"ml-2 " + (video.is_active ? "bg-green-500 text-white" : "bg-gray-400 text-white") }>
+                        <Badge variant={video.is_active ? "default" : "secondary"} className="ml-2">
                           {video.is_active ? 'Active' : 'Inactive'}
                         </Badge>
                       </div>

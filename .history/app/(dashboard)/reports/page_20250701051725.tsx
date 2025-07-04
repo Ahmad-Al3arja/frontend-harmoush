@@ -280,19 +280,7 @@ export default function ReportsPage() {
       const data = await api.reports.getAll(accessToken, params.toString());
       console.log("Reports fetched successfully:", data);
       
-      setReports((data.reports || []).map((r: any) => ({
-        ...r,
-        priority: r.priority ?? '',
-        priority_display: r.priority_display ?? '',
-        public_response: r.public_response ?? '',
-        action_taken: r.action_taken ?? '',
-        action_details: r.action_details ?? '',
-        report_count: r.report_count ?? 0,
-        is_duplicate: r.is_duplicate ?? false,
-        time_since_created: r.time_since_created ?? '',
-        is_urgent: r.is_urgent ?? false,
-        requires_immediate_action: r.requires_immediate_action ?? false,
-      })));
+      setReports(data.reports || []);
       setPagination(data.pagination);
     } catch (err: any) {
       console.error("Error fetching reports:", err);

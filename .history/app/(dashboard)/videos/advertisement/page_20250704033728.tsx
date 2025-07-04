@@ -12,36 +12,9 @@ import { LoadingBar } from '@/components/ui/loading-bar'
 import { toast } from 'sonner'
 import { Upload, Play, Edit, Trash2, Eye, CheckCircle, XCircle, Plus } from 'lucide-react'
 import { useAuthStore } from '@/app/lib/store'
+import { api, AdvertisementVideo } from '@/app/lib/api'
 
-interface AdvertisementVideo {
-  id: number
-  title: string
-  video: string
-  video_url: string
-  thumbnail: string | null
-  thumbnail_url: string | null
-  uploaded_by: number
-  uploaded_by_name: string
-  uploaded_at: string
-  updated_at: string
-  is_active: boolean
-}
 
-// Helper to get CSRF token from cookies
-function getCookie(name: string) {
-  let cookieValue = null;
-  if (typeof document !== 'undefined' && document.cookie && document.cookie !== '') {
-    const cookies = document.cookie.split(';');
-    for (let i = 0; i < cookies.length; i++) {
-      const cookie = cookies[i].trim();
-      if (cookie.substring(0, name.length + 1) === (name + '=')) {
-        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-        break;
-      }
-    }
-  }
-  return cookieValue;
-}
 
 export default function AdvertisementVideosPage() {
   const [videos, setVideos] = useState<AdvertisementVideo[]>([])
@@ -56,9 +29,7 @@ export default function AdvertisementVideosPage() {
     thumbnail: null as File | null,
     is_active: false
   })
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState<number | null>(null)
 
-  const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://188.245.103.205/api'
   const accessToken = useAuthStore((state) => state.accessToken)
 
   useEffect(() => {
@@ -68,15 +39,13 @@ export default function AdvertisementVideosPage() {
   const fetchVideos = async () => {
     try {
       setLoading(true)
-      const response = await fetch(`${API_BASE}/videos/`, {
-        headers: accessToken ? { 'Authorization': `Bearer ${accessToken}` } : {},
-      })
-      if (response.ok) {
-        const data = await response.json()
-        setVideos(data)
-      } else {
-        toast.error('Failed to fetch videos')
+      if (!accessToken) {
+        toast.error('Authentication required')
+        return
       }
+      
+      const data = await api.videos.getAll(accessToken)
+      setVideos(data)
     } catch (error) {
       toast.error('Error fetching videos')
     } finally {
@@ -97,6 +66,11 @@ export default function AdvertisementVideosPage() {
       return
     }
 
+    if (!accessToken) {
+      toast.error('Authentication required')
+      return
+    }
+
     try {
       setUploading(true)
       const formDataToSend = new FormData()
@@ -107,7 +81,7 @@ export default function AdvertisementVideosPage() {
       }
       formDataToSend.append('is_active', formData.is_active.toString())
 
-      console.log('Uploading video to:', `${API_BASE}/videos/`)
+      console.log('Uploading video using API')
       console.log('FormData contents:', {
         title: formData.title,
         videoName: formData.video.name,
@@ -116,30 +90,12 @@ export default function AdvertisementVideosPage() {
         isActive: formData.is_active
       })
 
-      const response = await fetch(`${API_BASE}/videos/`, {
-        method: 'POST',
-        headers: accessToken ? { 'Authorization': `Bearer ${accessToken}` } : {},
-        body: formDataToSend
-      })
+      await api.videos.create(formDataToSend, accessToken)
 
-      console.log('Response status:', response.status)
-      console.log('Response headers:', Object.fromEntries(response.headers.entries()))
-
-      if (response.ok) {
-        toast.success('Video uploaded successfully')
-        setIsUploadDialogOpen(false)
-        setFormData({ title: '', video: null, thumbnail: null, is_active: false })
-        fetchVideos()
-      } else {
-        const errorText = await response.text()
-        console.error('Upload error response:', errorText)
-        try {
-          const error = JSON.parse(errorText)
-          toast.error(error.video?.[0] || 'Failed to upload video')
-        } catch (parseError) {
-          toast.error(`Upload failed: ${response.status} ${response.statusText}`)
-        }
-      }
+      toast.success('Video uploaded successfully')
+      setIsUploadDialogOpen(false)
+      setFormData({ title: '', video: null, thumbnail: null, is_active: false })
+      fetchVideos()
     } catch (error) {
       console.error('Upload error:', error)
       toast.error(`Error uploading video: ${error instanceof Error ? error.message : 'Unknown error'}`)
@@ -151,6 +107,11 @@ export default function AdvertisementVideosPage() {
   const handleEdit = async () => {
     if (!selectedVideo || !formData.title) {
       toast.error('Please fill in all required fields')
+      return
+    }
+
+    if (!accessToken) {
+      toast.error('Authentication required')
       return
     }
 
@@ -166,22 +127,13 @@ export default function AdvertisementVideosPage() {
       }
       formDataToSend.append('is_active', formData.is_active.toString())
 
-      const response = await fetch(`${API_BASE}/videos/${selectedVideo.id}/`, {
-        method: 'PUT',
-        headers: accessToken ? { 'Authorization': `Bearer ${accessToken}` } : {},
-        body: formDataToSend
-      })
+      await api.videos.update(selectedVideo.id, formDataToSend, accessToken)
 
-      if (response.ok) {
-        toast.success('Video updated successfully')
-        setIsEditDialogOpen(false)
-        setSelectedVideo(null)
-        setFormData({ title: '', video: null, thumbnail: null, is_active: false })
-        fetchVideos()
-      } else {
-        const error = await response.json()
-        toast.error(error.video?.[0] || 'Failed to update video')
-      }
+      toast.success('Video updated successfully')
+      setIsEditDialogOpen(false)
+      setSelectedVideo(null)
+      setFormData({ title: '', video: null, thumbnail: null, is_active: false })
+      fetchVideos()
     } catch (error) {
       toast.error('Error updating video')
     } finally {
@@ -190,38 +142,32 @@ export default function AdvertisementVideosPage() {
   }
 
   const handleDelete = async (videoId: number) => {
-    try {
-      const response = await fetch(`${API_BASE}/videos/${videoId}/`, {
-        method: 'DELETE',
-        headers: accessToken ? { 'Authorization': `Bearer ${accessToken}` } : {},
-      })
+    if (!accessToken) {
+      toast.error('Authentication required')
+      return
+    }
 
-      if (response.ok) {
-        toast.success('Video deleted successfully')
-        fetchVideos()
-      } else {
-        toast.error('Failed to delete video')
-      }
+    try {
+      await api.videos.delete(videoId, accessToken)
+      toast.success('Video deleted successfully')
+      fetchVideos()
     } catch (error) {
       toast.error('Error deleting video')
     }
   }
 
   const handleSetActive = async (videoId: number) => {
-    try {
-      const response = await fetch(`${API_BASE}/videos/${videoId}/set-active/`, {
-        method: 'POST',
-        headers: accessToken ? { 'Authorization': `Bearer ${accessToken}` } : {},
-      })
+    if (!accessToken) {
+      toast.error('Authentication required')
+      return
+    }
 
-      if (response.ok) {
-        toast.success('Video activated successfully')
-        fetchVideos()
-      } else {
-        toast.error('Failed to activate video')
-      }
+    try {
+      await api.videos.setActive(videoId, accessToken)
+      toast.success('Video status updated successfully')
+      fetchVideos()
     } catch (error) {
-      toast.error('Error activating video')
+      toast.error('Error updating video status')
     }
   }
 
@@ -362,7 +308,7 @@ export default function AdvertisementVideosPage() {
                     <CardTitle className="flex items-center gap-2">
                       {video.title}
                       {video.is_active && (
-                        <Badge className="bg-green-500">
+                        <Badge variant="default" className="bg-green-500">
                           <CheckCircle className="w-3 h-3 mr-1" />
                           Active
                         </Badge>
@@ -391,10 +337,16 @@ export default function AdvertisementVideosPage() {
                       <Edit className="w-4 h-4 mr-1" />
                       Edit
                     </Button>
-                    <Button size="sm" variant="outline" className="text-red-600" onClick={() => setDeleteDialogOpen(video.id)}>
-                      <Trash2 className="w-4 h-4 mr-1" />
-                      Delete
-                    </Button>
+                    <ConfirmDialog
+                      title="Delete Video"
+                      description="Are you sure you want to delete this video? This action cannot be undone."
+                      onConfirm={() => handleDelete(video.id)}
+                    >
+                      <Button size="sm" variant="outline" className="text-red-600">
+                        <Trash2 className="w-4 h-4 mr-1" />
+                        Delete
+                      </Button>
+                    </ConfirmDialog>
                   </div>
                 </div>
               </CardHeader>
@@ -427,7 +379,7 @@ export default function AdvertisementVideosPage() {
                     <div className="space-y-2 text-sm">
                       <div>
                         <span className="font-medium">Status:</span>
-                        <Badge className={"ml-2 " + (video.is_active ? "bg-green-500 text-white" : "bg-gray-400 text-white") }>
+                        <Badge variant={video.is_active ? "default" : "secondary"} className="ml-2">
                           {video.is_active ? 'Active' : 'Inactive'}
                         </Badge>
                       </div>

@@ -8,6 +8,12 @@ const nextConfig = {
     // Disable ESLint during build
     ignoreDuringBuilds: true,
   },
+  api: {
+    bodyParser: {
+      sizeLimit: '250mb',
+    },
+    responseLimit: false,
+  },
   images: {
     remotePatterns: [
       {
