@@ -416,17 +416,6 @@ export const api = {
           throw new Error('Health check failed');
         }
       } catch (error) {
-        // Handle certificate errors gracefully
-        if (error instanceof Error && (
-          error.message.includes('certificate') || 
-          error.message.includes('CERT_') ||
-          error.message.includes('SSL') ||
-          error.message.includes('TLS') ||
-          error.message.includes('self-signed')
-        )) {
-          console.warn('Certificate error detected during health check');
-          throw new Error('Connection security issue. Please contact your administrator.');
-        }
         throw new Error('Unable to connect to server');
       }
     },
@@ -553,34 +542,19 @@ export const api = {
       request<Category>(`/categories/${id}/`, { token }),
 
     create: async (formData: FormData, token: string): Promise<Category> => {
-      try {
-        const response = await fetch(`${API_BASE_URL}/categories/create/`, {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          body: formData,
-        });
+      const response = await fetch(`${API_BASE_URL}/categories/create/`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      });
 
-        if (!response.ok) {
-          throw new Error("Failed to create category");
-        }
-
-        return response.json();
-      } catch (error) {
-        // Handle certificate errors gracefully
-        if (error instanceof Error && (
-          error.message.includes('certificate') || 
-          error.message.includes('CERT_') ||
-          error.message.includes('SSL') ||
-          error.message.includes('TLS') ||
-          error.message.includes('self-signed')
-        )) {
-          console.warn('Certificate error detected while creating category');
-          throw new Error('Connection security issue. Please contact your administrator.');
-        }
-        throw error;
+      if (!response.ok) {
+        throw new Error("Failed to create category");
       }
+
+      return response.json();
     },
 
     update: async (
@@ -588,34 +562,19 @@ export const api = {
       formData: FormData,
       token: string
     ): Promise<Category> => {
-      try {
-        const response = await fetch(`${API_BASE_URL}/categories/${id}/update/`, {
-          method: "PUT",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          body: formData,
-        });
+      const response = await fetch(`${API_BASE_URL}/categories/${id}/update/`, {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      });
 
-        if (!response.ok) {
-          throw new Error("Failed to update category");
-        }
-
-        return response.json();
-      } catch (error) {
-        // Handle certificate errors gracefully
-        if (error instanceof Error && (
-          error.message.includes('certificate') || 
-          error.message.includes('CERT_') ||
-          error.message.includes('SSL') ||
-          error.message.includes('TLS') ||
-          error.message.includes('self-signed')
-        )) {
-          console.warn('Certificate error detected while updating category');
-          throw new Error('Connection security issue. Please contact your administrator.');
-        }
-        throw error;
+      if (!response.ok) {
+        throw new Error("Failed to update category");
       }
+
+      return response.json();
     },
 
     delete: (id: number, token: string) =>
@@ -630,35 +589,20 @@ export const api = {
       token: string,
       queryString?: string
     ): Promise<ApiResponse> => {
-      try {
-        const url = queryString
-          ? `${API_BASE_URL}/products/?${queryString}`
-          : `${API_BASE_URL}/products/`;
+      const url = queryString
+        ? `${API_BASE_URL}/products/?${queryString}`
+        : `${API_BASE_URL}/products/`;
 
-        const response = await fetch(url, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+      const response = await fetch(url, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
-        if (!response.ok) throw new Error("Failed to fetch products");
+      if (!response.ok) throw new Error("Failed to fetch products");
 
-        const data = await response.json();
-        return data as ApiResponse;
-      } catch (error) {
-        // Handle certificate errors gracefully
-        if (error instanceof Error && (
-          error.message.includes('certificate') || 
-          error.message.includes('CERT_') ||
-          error.message.includes('SSL') ||
-          error.message.includes('TLS') ||
-          error.message.includes('self-signed')
-        )) {
-          console.warn('Certificate error detected while fetching products');
-          throw new Error('Connection security issue. Please contact your administrator.');
-        }
-        throw error;
-      }
+      const data = await response.json();
+      return data as ApiResponse;
     },
 
     get: (id: number, token: string) =>
@@ -781,65 +725,35 @@ export const api = {
       ).then((response) => response.results || []),
 
     addImages: async (productId: number, formData: FormData, token: string) => {
-      try {
-        const response = await fetch(
-          `${API_BASE_URL}/products/${productId}/images/`,
-          {
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-            body: formData,
-          }
-        );
+      const response = await fetch(
+        `${API_BASE_URL}/products/${productId}/images/`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          body: formData,
+        }
+      );
 
-        if (!response.ok) {
-          throw new Error("Failed to upload images");
-        }
-        return await response.json();
-      } catch (error) {
-        // Handle certificate errors gracefully
-        if (error instanceof Error && (
-          error.message.includes('certificate') || 
-          error.message.includes('CERT_') ||
-          error.message.includes('SSL') ||
-          error.message.includes('TLS') ||
-          error.message.includes('self-signed')
-        )) {
-          console.warn('Certificate error detected while uploading product images');
-          throw new Error('Connection security issue. Please contact your administrator.');
-        }
-        throw error;
+      if (!response.ok) {
+        throw new Error("Failed to upload images");
       }
+      return await response.json();
     },
 
     deleteImage: async (productId: number, imageId: number, token: string) => {
-      try {
-        const response = await fetch(
-          `${API_BASE_URL}/products/${productId}/images/${imageId}/`,
-          {
-            method: "DELETE",
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-        if (!response.ok) throw new Error("Failed to delete image");
-        return true;
-      } catch (error) {
-        // Handle certificate errors gracefully
-        if (error instanceof Error && (
-          error.message.includes('certificate') || 
-          error.message.includes('CERT_') ||
-          error.message.includes('SSL') ||
-          error.message.includes('TLS') ||
-          error.message.includes('self-signed')
-        )) {
-          console.warn('Certificate error detected while deleting product image');
-          throw new Error('Connection security issue. Please contact your administrator.');
+      const response = await fetch(
+        `${API_BASE_URL}/products/${productId}/images/${imageId}/`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         }
-        throw error;
-      }
+      );
+      if (!response.ok) throw new Error("Failed to delete image");
+      return true;
     },
 
     reorderImages: async (

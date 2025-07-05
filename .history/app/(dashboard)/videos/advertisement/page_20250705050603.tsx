@@ -154,19 +154,7 @@ export default function AdvertisementVideosPage() {
       }
     } catch (error) {
       console.error('Upload error:', error)
-      // Handle certificate errors gracefully
-      if (error instanceof Error && (
-        error.message.includes('certificate') || 
-        error.message.includes('CERT_') ||
-        error.message.includes('SSL') ||
-        error.message.includes('TLS') ||
-        error.message.includes('self-signed')
-      )) {
-        console.warn('Certificate error detected while uploading video');
-        toast.error('Connection security issue. Please contact your administrator.')
-      } else {
-        toast.error(`Error uploading video: ${error instanceof Error ? error.message : 'Unknown error'}`)
-      }
+      toast.error(`Error uploading video: ${error instanceof Error ? error.message : 'Unknown error'}`)
     } finally {
       setUploading(false)
     }
@@ -207,19 +195,7 @@ export default function AdvertisementVideosPage() {
         toast.error(error.video?.[0] || 'Failed to update video')
       }
     } catch (error) {
-      // Handle certificate errors gracefully
-      if (error instanceof Error && (
-        error.message.includes('certificate') || 
-        error.message.includes('CERT_') ||
-        error.message.includes('SSL') ||
-        error.message.includes('TLS') ||
-        error.message.includes('self-signed')
-      )) {
-        console.warn('Certificate error detected while updating video');
-        toast.error('Connection security issue. Please contact your administrator.')
-      } else {
-        toast.error('Error updating video')
-      }
+      toast.error('Error updating video')
     } finally {
       setUploading(false)
     }
@@ -239,19 +215,7 @@ export default function AdvertisementVideosPage() {
         toast.error('Failed to delete video')
       }
     } catch (error) {
-      // Handle certificate errors gracefully
-      if (error instanceof Error && (
-        error.message.includes('certificate') || 
-        error.message.includes('CERT_') ||
-        error.message.includes('SSL') ||
-        error.message.includes('TLS') ||
-        error.message.includes('self-signed')
-      )) {
-        console.warn('Certificate error detected while deleting video');
-        toast.error('Connection security issue. Please contact your administrator.')
-      } else {
-        toast.error('Error deleting video')
-      }
+      toast.error('Error deleting video')
     }
   }
 
@@ -269,19 +233,7 @@ export default function AdvertisementVideosPage() {
         toast.error('Failed to activate video')
       }
     } catch (error) {
-      // Handle certificate errors gracefully
-      if (error instanceof Error && (
-        error.message.includes('certificate') || 
-        error.message.includes('CERT_') ||
-        error.message.includes('SSL') ||
-        error.message.includes('TLS') ||
-        error.message.includes('self-signed')
-      )) {
-        console.warn('Certificate error detected while activating video');
-        toast.error('Connection security issue. Please contact your administrator.')
-      } else {
-        toast.error('Error activating video')
-      }
+      toast.error('Error activating video')
     }
   }
 

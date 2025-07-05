@@ -269,19 +269,7 @@ export default function AdvertisementVideosPage() {
         toast.error('Failed to activate video')
       }
     } catch (error) {
-      // Handle certificate errors gracefully
-      if (error instanceof Error && (
-        error.message.includes('certificate') || 
-        error.message.includes('CERT_') ||
-        error.message.includes('SSL') ||
-        error.message.includes('TLS') ||
-        error.message.includes('self-signed')
-      )) {
-        console.warn('Certificate error detected while activating video');
-        toast.error('Connection security issue. Please contact your administrator.')
-      } else {
-        toast.error('Error activating video')
-      }
+      toast.error('Error activating video')
     }
   }
 

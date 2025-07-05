@@ -781,65 +781,35 @@ export const api = {
       ).then((response) => response.results || []),
 
     addImages: async (productId: number, formData: FormData, token: string) => {
-      try {
-        const response = await fetch(
-          `${API_BASE_URL}/products/${productId}/images/`,
-          {
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-            body: formData,
-          }
-        );
+      const response = await fetch(
+        `${API_BASE_URL}/products/${productId}/images/`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          body: formData,
+        }
+      );
 
-        if (!response.ok) {
-          throw new Error("Failed to upload images");
-        }
-        return await response.json();
-      } catch (error) {
-        // Handle certificate errors gracefully
-        if (error instanceof Error && (
-          error.message.includes('certificate') || 
-          error.message.includes('CERT_') ||
-          error.message.includes('SSL') ||
-          error.message.includes('TLS') ||
-          error.message.includes('self-signed')
-        )) {
-          console.warn('Certificate error detected while uploading product images');
-          throw new Error('Connection security issue. Please contact your administrator.');
-        }
-        throw error;
+      if (!response.ok) {
+        throw new Error("Failed to upload images");
       }
+      return await response.json();
     },
 
     deleteImage: async (productId: number, imageId: number, token: string) => {
-      try {
-        const response = await fetch(
-          `${API_BASE_URL}/products/${productId}/images/${imageId}/`,
-          {
-            method: "DELETE",
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-        if (!response.ok) throw new Error("Failed to delete image");
-        return true;
-      } catch (error) {
-        // Handle certificate errors gracefully
-        if (error instanceof Error && (
-          error.message.includes('certificate') || 
-          error.message.includes('CERT_') ||
-          error.message.includes('SSL') ||
-          error.message.includes('TLS') ||
-          error.message.includes('self-signed')
-        )) {
-          console.warn('Certificate error detected while deleting product image');
-          throw new Error('Connection security issue. Please contact your administrator.');
+      const response = await fetch(
+        `${API_BASE_URL}/products/${productId}/images/${imageId}/`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         }
-        throw error;
-      }
+      );
+      if (!response.ok) throw new Error("Failed to delete image");
+      return true;
     },
 
     reorderImages: async (

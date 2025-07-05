@@ -86,22 +86,10 @@ export default function DeleteAccount() {
         }, 2000);
       }
     } catch (error: any) {
-      // Handle certificate errors gracefully
-      if (error instanceof Error && (
-        error.message.includes('certificate') || 
-        error.message.includes('CERT_') ||
-        error.message.includes('SSL') ||
-        error.message.includes('TLS') ||
-        error.message.includes('self-signed')
-      )) {
-        console.warn('Certificate error detected while deleting account');
-        setError('Connection security issue. Please contact your administrator.');
-      } else {
-        // Show the error message but don't redirect
-        setError(
-          error.message || "Failed to delete account. Please try again later."
-        );
-      }
+      // Show the error message but don't redirect
+      setError(
+        error.message || "Failed to delete account. Please try again later."
+      );
       console.error("Delete account error:", error);
       // No password field to reset
     } finally {
