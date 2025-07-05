@@ -58,7 +58,7 @@ export default function AdvertisementVideosPage() {
   })
   const [deleteDialogOpen, setDeleteDialogOpen] = useState<number | null>(null)
 
-  const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://188.245.103.205/api'
+  const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://188.245.103.205/api'
   const accessToken = useAuthStore((state) => state.accessToken)
 
   useEffect(() => {
