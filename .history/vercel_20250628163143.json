@@ -4,17 +4,17 @@
   "installCommand": "npm install",
   "framework": "nextjs",
   "images": {
-    "domains": ["amris.duckdns.org", "localhost", "example.com", "placehold.co"],
+    "domains": ["t3h.dracode.org", "localhost", "example.com", "placehold.co"],
     "remotePatterns": [
       {
-        "protocol": "https",
-        "hostname": "amris.duckdns.org",
-        "pathname": "/media/**"
+        "protocol": "http",
+        "hostname": "t3h.dracode.org",
+        "pathname": "/**"
       },
       {
         "protocol": "https",
-        "hostname": "amris.duckdns.org",
-        "pathname": "/api/**"
+        "hostname": "t3h.dracode.org",
+        "pathname": "/**"
       }
     ],
     "sizes": [16, 32, 48, 64, 96, 128, 256, 384]
